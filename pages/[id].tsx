@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../utils/supabase";
 import Link from "next/link";
-import { Coach, Workout } from "../types";
+import { Coach, Decision, Workout } from "../types";
 
 const WorkoutDetails = ({ workout }: { workout: Workout }) => {
   const [coach, setCoach] = useState<Coach>();
+  const [decision, setDecision] = useState(false);
+  const user = { id: "f7a3658c-6f8f-437b-a799-ce3f00498b74" };
 
   const getCoach = async () => {
     const { data } = await supabase.from<Coach>("users").select("*").eq("id", workout.coach_id).single();
@@ -12,8 +14,29 @@ const WorkoutDetails = ({ workout }: { workout: Workout }) => {
     setCoach(data!);
   };
 
+  const getDecision = async () => {
+    const { data: decisions } = await supabase
+      .from<Decision>("decisions")
+      .select("*")
+      .eq("workout_id", workout.id)
+      .eq("user_id", user.id);
+    if (decisions?.length) {
+      setDecision(decisions[0].decision);
+    }
+  };
+
   // @ts-ignore
   useEffect(getCoach, []);
+  // @ts-ignore
+  useEffect(getDecision, []);
+
+  const handleGoToWorkout = async () => {
+    const { data, error } = await supabase
+      .from<Decision>("decisions")
+      .insert([{ user_id: user.id, workout_id: workout.id, decision: true }]);
+
+    alert(JSON.stringify(error ?? data, null, 2));
+  };
 
   if (!coach) return <p>Loading</p>;
   return (
@@ -24,6 +47,9 @@ const WorkoutDetails = ({ workout }: { workout: Workout }) => {
       </Link>
       <pre>{JSON.stringify(coach, null, 2)}</pre>
       <pre>{JSON.stringify(workout, null, 2)}</pre>
+      <button onClick={handleGoToWorkout} disabled={decision}>
+        {decision ? "Already attend" : "I'll go"}
+      </button>
     </div>
   );
 };

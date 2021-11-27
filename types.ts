@@ -15,3 +15,10 @@ export interface Coach {
   profile_url: string;
   instagram_url: string;
 }
+
+export interface Decision {
+  id: string;
+  user_id: string;
+  workout_id: string;
+  decision: boolean;
+}
