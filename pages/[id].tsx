@@ -31,11 +31,12 @@ const WorkoutDetails = ({ workout }: { workout: Workout }) => {
   useEffect(getDecision, []);
 
   const handleGoToWorkout = async () => {
-    const { data, error } = await supabase
+    const { data: decisions, error } = await supabase
       .from<Decision>("decisions")
       .insert([{ user_id: user.id, workout_id: workout.id, decision: true }]);
 
-    alert(JSON.stringify(error ?? data, null, 2));
+    alert(JSON.stringify(error ?? decisions, null, 2));
+    if (decisions?.length) setDecision(decisions[0].decision);
   };
 
   if (!coach) return <p>Loading</p>;
