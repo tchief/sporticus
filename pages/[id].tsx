@@ -1,29 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../utils/supabase";
 import Link from "next/link";
+import { Coach, Workout } from "../types";
 
-interface Workout {
-  id: string;
-  max_people: number;
-  date: string;
-  latitude: number;
-  longitude: number;
-  coach_id: string;
-}
-
-interface Coach {
-  name: string;
-  profile_url: string;
-  instagram_url: string;
-}
-
-const WorkoutDetails = ({ workout }: any) => {
+const WorkoutDetails = ({ workout }: { workout: Workout }) => {
   const [coach, setCoach] = useState<Coach>();
 
   const getCoach = async () => {
-    const { data } = await supabase.from("users").select("*").eq("id", workout.coach_id).single();
+    const { data } = await supabase.from<Coach>("users").select("*").eq("id", workout.coach_id).single();
     console.log(data);
-    setCoach(data);
+    setCoach(data!);
   };
 
   // @ts-ignore

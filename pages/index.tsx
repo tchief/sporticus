@@ -1,5 +1,6 @@
 import type { NextPage } from "next";
 import Link from "next/link";
+import { Workout } from "../types";
 import { supabase } from "../utils/supabase";
 
 const Home: NextPage = ({ workouts }: any) => {
@@ -17,7 +18,7 @@ const Home: NextPage = ({ workouts }: any) => {
   );
 };
 export const getStaticProps = async () => {
-  const { data: workouts } = await supabase.from("workoutz").select("*");
+  const { data: workouts } = await supabase.from<Workout>("workoutz").select("*");
 
   return {
     props: {
