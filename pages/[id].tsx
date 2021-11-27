@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import { supabase } from "../utils/supabase";
 import Link from "next/link";
 import { Coach, Decision, Workout } from "../types";
+import { useUser } from "../hooks/useUser";
 
 const WorkoutDetails = ({ workout }: { workout: Workout }) => {
   const [coach, setCoach] = useState<Coach>();
   const [decision, setDecision] = useState(false);
-  const user = { id: "f7a3658c-6f8f-437b-a799-ce3f00498b74" };
+  const user = useUser();
 
   const getCoach = async () => {
     const { data } = await supabase.from<Coach>("users").select("*").eq("id", workout.coach_id).single();
@@ -48,9 +49,7 @@ const WorkoutDetails = ({ workout }: { workout: Workout }) => {
       </Link>
       <pre>{JSON.stringify(coach, null, 2)}</pre>
       <pre>{JSON.stringify(workout, null, 2)}</pre>
-      <button onClick={handleGoToWorkout} disabled={decision}>
-        {decision ? "Already attend" : "I'll go"}
-      </button>
+      <button onClick={handleGoToWorkout}>{decision ? "Already attend" : "I'll go"}</button>
     </div>
   );
 };
