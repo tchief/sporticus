@@ -14,6 +14,7 @@ export interface Coach {
   name: string;
   profile_url: string;
   instagram_url: string;
+  is_coach?: boolean;
 }
 
 export interface Decision {
@@ -37,5 +38,6 @@ export const DEFAULT_USER: Coach = {
   id: "f7a3658c-6f8f-437b-a799-ce3f00498b74",
   name: "Arnold",
   instagram_url: "https://www.instagram.com/schwarzenegger/",
-  profile_url: "https://manofmany.com/wp-content/uploads/2019/03/Arnold-Schwarzeneggers-Diet-and-Workout-Plan.jpg",
+  profile_url:
+    "https://manofmany.com/wp-content/uploads/2019/03/Arnold-Schwarzeneggers-Diet-and-Workout-Plan.jpg",
 };
