@@ -34,10 +34,17 @@ export const DEFAULT_WORKOUT: Omit<Workout, "id"> = {
   description: "We'll do stretching",
 };
 
-export const DEFAULT_USER: Coach = {
+export const DEFAULT_COACH: Coach = {
   id: "f7a3658c-6f8f-437b-a799-ce3f00498b74",
   name: "Arnold",
   instagram_url: "https://www.instagram.com/schwarzenegger/",
   profile_url:
     "https://manofmany.com/wp-content/uploads/2019/03/Arnold-Schwarzeneggers-Diet-and-Workout-Plan.jpg",
+  is_coach: true,
+};
+
+export const DEFAULT_USER: Omit<Coach, "profile_url" | "instagram_url"> = {
+  id: "b5a1c9f0-69fa-4af5-96b8-ab80d04312ef",
+  name: "Emily",
+  is_coach: false,
 };

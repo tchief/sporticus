@@ -2,30 +2,19 @@ import type { NextPage } from "next";
 import { useRouter } from "next/dist/client/router";
 import Link from "next/link";
 import { useState } from "react";
-import { useUser } from "../hooks/useUser";
-import { Coach, DEFAULT_USER, DEFAULT_WORKOUT, Workout } from "../types";
+import { useWorkouts } from "../hooks/useWorkouts";
+import { DEFAULT_COACH, DEFAULT_WORKOUT, Workout } from "../types";
 import { isWithinRadius } from "../utils/distance";
-import { supabase } from "../utils/supabase";
 
 const Home: NextPage = ({ workouts }: any) => {
   const router = useRouter();
   const refreshData = () => router.replace(router.asPath);
 
   const [radius, setRadius] = useState(150000);
-  const user = useUser();
   const userLocation = { latitude: 50, longitude: 50 };
 
-  const handleAddWorkout = async () => {
-    if (!user.id) {
-      const { data: users, error } = await supabase.from<Coach>("users").insert([DEFAULT_USER]);
-      alert(JSON.stringify(error ?? users, null, 2));
-    }
-
-    const { data: workouts, error } = await supabase.from<Workout>("workoutz").insert([DEFAULT_WORKOUT]);
-    alert(JSON.stringify(error ?? workouts, null, 2));
-
-    refreshData();
-  };
+  const db = useWorkouts(refreshData);
+  const handleAddWorkout = async () => await db.addWorkout(DEFAULT_COACH, DEFAULT_WORKOUT);
 
   return (
     <div className="w-full max-w-3xl mx-auto my-16 px-2">
@@ -45,7 +34,9 @@ const Home: NextPage = ({ workouts }: any) => {
   );
 };
 export const getStaticProps = async () => {
-  const { data: workouts } = await supabase.from<Workout>("workoutz").select("*");
+  const db = useWorkouts();
+
+  const { workouts } = await db.getAllWorkouts();
 
   return {
     props: {

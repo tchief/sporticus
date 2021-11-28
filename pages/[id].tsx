@@ -1,44 +1,18 @@
-import React, { useEffect, useState } from "react";
-import { supabase } from "../utils/supabase";
+import React from "react";
 import Link from "next/link";
-import { Coach, Decision, Workout } from "../types";
+import { Workout } from "../types";
 import { useUser } from "../hooks/useUser";
+import { useWorkouts } from "../hooks/useWorkouts";
+import { useWorkoutDetailsForUser } from "../hooks/useWorkoutsDetails";
 
 const WorkoutDetails = ({ workout }: { workout: Workout }) => {
-  const [coach, setCoach] = useState<Coach>();
-  const [decision, setDecision] = useState(false);
   const user = useUser();
+  const { coach, decision, setDecision } = useWorkoutDetailsForUser({
+    workoutId: workout.id,
+    coachId: workout.coach_id,
+  });
 
-  const getCoach = async () => {
-    const { data } = await supabase.from<Coach>("users").select("*").eq("id", workout.coach_id).single();
-    console.log(data);
-    setCoach(data!);
-  };
-
-  const getDecision = async () => {
-    const { data: decisions } = await supabase
-      .from<Decision>("decisions")
-      .select("*")
-      .eq("workout_id", workout.id)
-      .eq("user_id", user.id);
-    if (decisions?.length) {
-      setDecision(decisions[0].decision);
-    }
-  };
-
-  // @ts-ignore
-  useEffect(getCoach, []);
-  // @ts-ignore
-  useEffect(getDecision, []);
-
-  const handleGoToWorkout = async () => {
-    const { data: decisions, error } = await supabase
-      .from<Decision>("decisions")
-      .insert([{ user_id: user.id, workout_id: workout.id, decision: true }]);
-
-    alert(JSON.stringify(error ?? decisions, null, 2));
-    if (decisions?.length) setDecision(decisions[0].decision);
-  };
+  const handleGoToWorkout = async () => await setDecision(user.id, workout.id, true);
 
   if (!coach) return <p>Loading</p>;
   return (
@@ -49,13 +23,17 @@ const WorkoutDetails = ({ workout }: { workout: Workout }) => {
       </Link>
       <pre>{JSON.stringify(coach, null, 2)}</pre>
       <pre>{JSON.stringify(workout, null, 2)}</pre>
-      <button onClick={handleGoToWorkout}>{decision ? "Already attend" : "I'll go"}</button>
+      <button onClick={handleGoToWorkout} disabled={decision}>
+        {decision ? "Already attend" : "I'll go"}
+      </button>
     </div>
   );
 };
 
 export const getStaticPaths = async () => {
-  const { data: workouts } = await supabase.from("workoutz").select("id");
+  const db = useWorkouts();
+
+  const { workouts } = await db.getAllWorkoutsIds();
 
   const paths = workouts?.map(({ id }) => ({
     params: {
@@ -70,7 +48,9 @@ export const getStaticPaths = async () => {
 };
 
 export const getStaticProps = async ({ params: { id } }: any) => {
-  const { data: workout } = await supabase.from("workoutz").select("*").eq("id", id).single();
+  const db = useWorkouts();
+
+  const { workout } = await db.getWorkout(id);
 
   return {
     props: {

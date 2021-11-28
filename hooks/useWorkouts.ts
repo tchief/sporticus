@@ -1,12 +1,12 @@
-import { Coach, Decision, DEFAULT_USER, DEFAULT_WORKOUT, Workout } from "../types";
+import { Coach, Decision, DEFAULT_COACH, DEFAULT_WORKOUT, Workout } from "../types";
 import { TABLE_DECISIONS, supabase, TABLE_USERS, TABLE_WORKOUTS } from "../utils/supabase";
 import { NO_OP } from "../utils/utils";
 
-export const useWorkouts = ({ refreshData = NO_OP }: any) => {
+export const useWorkouts = ({ refreshData }: any = { refreshData: NO_OP }) => {
   const addUser = async (userToAdd: Coach) => {
     const { data: users, error } = await supabase
       .from<Coach>(TABLE_USERS)
-      .insert([userToAdd ?? DEFAULT_USER]);
+      .insert([userToAdd ?? DEFAULT_COACH]);
     console.log(JSON.stringify(error ?? users, null, 2));
 
     refreshData();
@@ -14,11 +14,11 @@ export const useWorkouts = ({ refreshData = NO_OP }: any) => {
     return { users, error };
   };
 
-  const addWorkout = async (userToAdd: Coach, workoutToAdd: Workout) => {
+  const addWorkout = async (userToAdd: Coach, workoutToAdd: Omit<Workout, "id">) => {
     if (!userToAdd.id) {
       const { data: users, error } = await supabase
         .from<Coach>(TABLE_USERS)
-        .insert([userToAdd ?? DEFAULT_USER]);
+        .insert([userToAdd ?? DEFAULT_COACH]);
       console.log(JSON.stringify(error ?? users, null, 2));
     }
 
@@ -32,21 +32,12 @@ export const useWorkouts = ({ refreshData = NO_OP }: any) => {
     return { workouts, error };
   };
 
-  const setDecision = async (userId: string, workoutId: string, decision: boolean) => {
-    const { data: decisions, error } = await supabase
-      .from<Decision>(TABLE_DECISIONS)
-      .insert([{ user_id: userId, workout_id: workoutId, decision }]);
-    console.log(JSON.stringify(error ?? decisions, null, 2));
-    const decisionReturned = decisions?.length ? decisions[0].decision : null;
-    return { decision: decisionReturned, error };
-  };
-
   return {
     addWorkout,
     addUser,
-    setDecision,
 
     getAllWorkouts,
+    getAllWorkoutsIds,
     getWorkoutsForCoach,
     getWorkout,
 
@@ -60,6 +51,11 @@ export const useWorkouts = ({ refreshData = NO_OP }: any) => {
 
 const getAllWorkouts = async () => {
   const { data: workouts, error } = await supabase.from<Workout>(TABLE_WORKOUTS).select("*");
+  return { workouts, error };
+};
+
+const getAllWorkoutsIds = async () => {
+  const { data: workouts, error } = await supabase.from<Workout>(TABLE_WORKOUTS).select("id");
   return { workouts, error };
 };
 
